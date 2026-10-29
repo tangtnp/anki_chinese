@@ -7,13 +7,14 @@ export async function sync(store:Store,db:SupabaseClient,userId:string):Promise<
  // Only new web notes are uploaded as cards. Existing Anki snapshots are Mac-owned.
  const existing=await db.from('cards').select('id').eq('user_id',userId).limit(10000);if(existing.error)throw existing.error;
  const ids=new Set((existing.data||[]).map(x=>x.id));
- const missing=store.cards.filter(c=>!ids.has(c.id));
+ const missing=store.cards.filter(c=>c.source!=='anki'&&!ids.has(c.id));
  for(let i=0;i<missing.length;i+=100){const {error}=await db.from('cards').upsert(missing.slice(i,i+100).map(c=>({user_id:userId,id:c.id,data:c})),{onConflict:'user_id,id',ignoreDuplicates:true});if(error)throw error;}
  // Read reset markers before uploading any offline reviews.
  let remoteCards:Card[]=[];
  for(let from=0;;from+=1000){const {data,error}=await db.from('cards').select('data').eq('user_id',userId).order('id').range(from,from+999);if(error)throw error;remoteCards.push(...(data||[]).map(r=>r.data as Card));if(!data||data.length<1000)break;}
  const resetAt=remoteCards.reduce((latest,c)=>c.reset_at&&c.reset_at>latest?c.reset_at:latest,store.resetAt||'');
- const pending=store.reviews.filter(r=>r.status==='pending'&&(!resetAt||r.reviewed_at>resetAt));
+ const remoteIds=new Set(remoteCards.map(c=>c.id));
+ const pending=store.reviews.filter(r=>remoteIds.has(r.card_id)&&r.status==='pending'&&(!resetAt||r.reviewed_at>resetAt));
  for(let i=0;i<pending.length;i+=100){const {error}=await db.from('reviews').upsert(pending.slice(i,i+100).map(r=>({...r,user_id:userId})),{onConflict:'user_id,id',ignoreDuplicates:true});if(error)throw error;}
  // Expiration uses the server acknowledgement time, never the phone clock.
  // Old installations can keep syncing until the cleanup migration is installed.
