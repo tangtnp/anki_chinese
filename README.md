@@ -66,8 +66,14 @@ See [Amgi assessment](docs/amgi-assessment.md) for what can be reused conceptual
 
 ## Word and sentence practice
 
-The library has Words and Sentences tabs. All 1,980 bundled HSK word cards include a Chinese example and English translation, so the Sentences tab is available as soon as those words are loaded or synced. Pinyin is not displayed in either library tab or the web reviewer.
+The library has Words and Sentences tabs. All 1,980 bundled HSK word cards include a Chinese example and English translation, so the Sentences tab is available as soon as those words are loaded or synced. Pinyin stays hidden in both library tabs and the web reviewer until a Chinese character is tapped.
 
 Choosing **Review sentences** creates separate sentence cards for the examples once, with independent review progress. They sync to Anki as Basic-style notes in `::Sentences` subdecks. The companion marks them with `hanzi_flow_sentence` and a parent-reference tag, preserving their identity on the return sync. Update/restart the Anki companion before the first sentence-card sync. The **Add sentence** button supports personal Chinese/English cards. Pronunciation uses device Chinese text-to-speech for sentences.
 
 Browsing examples alone does not add review cards to the database; starting sentence practice does. Existing word schedules are preserved, and repeating the review action does not duplicate sentence cards. No database migration is required.
+
+## Tap-to-show pinyin
+
+Tap any Chinese character in the word library, sentence library, or reviewer to show its pinyin in a small anchored bubble. Tap the same character again, tap elsewhere, scroll, or press Escape to close it. Tapping a character does not grade or advance a flashcard. Deck-author word readings are preferred when syllables align; sentence readings are inferred from phrase context using the MIT-licensed `pinyin-pro` package. Automatic readings can still be imperfect for names or uncommon usages.
+
+The pronunciation dictionary loads separately from the main UI and is preloaded while the app is open. After it has loaded online, the production service worker caches it for offline use. No text is sent to an external pronunciation service. Routine sync notifications remain inline; pinyin bubbles appear only after a character tap.
