@@ -55,3 +55,11 @@ Run `supabase/migrations/20261029_review_cleanup.sql` once in the existing proje
 Each signed-in web sync removes up to 5,000 applied review records whose **Mac acknowledgement is older than 90 days**. The database records acknowledgement times itself. Existing applied reviews receive a new 90-day grace period when the migration is installed. Pending reviews, conflicts, cards, schedules, and Anki's own review history are preserved. Local review lists reflect cleanup after the next successful sync; daily practice totals stay in the browser's separate history.
 
 Cleanup runs when the website syncs, not while it is closed. Older databases without the migration continue syncing without cleanup. The Mac retry ledger is retained so an old offline device cannot replay a previously applied review after its cloud row expires. Storage usage can still grow with cards and unresolved reviews; cleanup does not guarantee a fixed database size. Postgres may reuse deleted-row space rather than immediately reducing the displayed disk size.
+
+## Large collections and recovery
+
+Cards and reviews now use IndexedDB, with per-record updates and atomic metadata saves. Old browser localStorage collections migrate automatically; their original JSON is removed only after the new save commits. Settings and auth metadata remain small localStorage entries. If storage cannot open or a save fails, the app shows recovery guidance instead of clearing data or rendering a blank page. Keep the tab open and export a backup if a save failure is displayed.
+
+Cloud sync pages by ID, handles API row caps, and downloads card content once per sync. Failed page requests leave the prior offline collection intact. Browse displays batches of 100 matches. No Supabase migration is required for these changes. Browser storage remains subject to device capacity and browser eviction; export backups regularly.
+
+See [Amgi assessment](docs/amgi-assessment.md) for what can be reused conceptually and what would require a native app or separate backend.
