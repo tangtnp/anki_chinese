@@ -124,7 +124,7 @@ def apply_and_snapshot(result):
             ledger[eid]={'status':'started'};col.set_config(ledger_key,ledger)
             try:
                 card.start_timer();states=col._backend.get_scheduling_states(card.id)
-                answer=col.sched.build_answer(card=card,states=states,rating=event['rating'])
+                answer=col.sched.build_answer(card=card,states=states,rating=event['rating']-1)
                 answer.milliseconds_taken=event.get('elapsed_ms',0)
                 # Apply at current sync time: avoid falsifying a historical scheduler state.
                 col.sched.answer_card(answer)

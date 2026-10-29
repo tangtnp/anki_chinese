@@ -34,7 +34,7 @@ The public site contains the supplied HSK study content. Personal cards and revi
 
 ## Deploy
 
-Vercel framework: **Vite**, build command `npm run build`, output `dist`. No server secrets are required. Supabase connection settings are entered on each device. Add the Vercel production URL to Supabase Authentication → URL Configuration (Site URL and allowed redirects) for account confirmation. No paid services are required for initial personal use; provider free-tier limits apply.
+Vercel framework: **Vite**, build command `npm run build`, output `dist`. No server secrets are required. Supabase connection settings are entered on each device. Add the Vercel production URL to Supabase Authentication → URL Configuration (Site URL and allowed redirects) for account confirmation. Provider free-tier limits apply. The current project was deployed through the Vercel source-upload API because the connected GitHub account differs from the local GitHub account. Its current build command extracts the uploaded static artifact. Before switching to Git deployments, set the project framework to Vite, build command to `npm run build`, and output to `dist`.
 
 To rebuild assets after replacing packages:
 
