@@ -41,6 +41,13 @@ class RealAnki(unittest.TestCase):
   event={'id':'old-event','card_id':'test-note:0','expected_reps':0,'rating':3,'reviewed_at':'2026-10-29T09:00:00.000Z'}
   result=self.apply([event]);self.assertEqual(result[1][0]['status'],'conflict');self.assertEqual(self.col.get_card(card.id).reps,0)
   self.assertEqual(result[2][0]['reset_at'],'2026-10-29T10:00:00.000Z')
+ def test_sentence_cards_round_trip_and_review_independently(self):
+  parent=self.note();data={'id':'sentence-note:0','front':'我每天学习中文。','back':'I study Chinese every day.','deck':'HSK 1::Sentences','kind':'sentence','sentenceFor':'test-note:0','source':'web'}
+  rows=[{'id':data['id'],'data':data}];result=self.apply(cards=rows)
+  sentence=next(c for c in result[2] if c['id']==data['id'])
+  self.assertEqual(sentence['kind'],'sentence');self.assertEqual(sentence['sentenceFor'],'test-note:0');self.assertEqual(sentence['relatedWord'],'你好')
+  event={'id':'sentence-review','card_id':data['id'],'expected_reps':0,'rating':3,'elapsed_ms':1000}
+  result=self.apply([event],rows);self.assertEqual(result[1][0]['status'],'applied');self.assertEqual(self.col.get_card(parent.id).reps,0)
  def test_web_note_import_is_idempotent(self):
   data={'id':'web-note:0','front':'谢谢','back':'thank you','deck':'My Chinese','pinyin':'xiè xie','source':'web'}
   rows=[{'id':data['id'],'data':data}]

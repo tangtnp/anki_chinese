@@ -63,3 +63,11 @@ Cards and reviews now use IndexedDB, with per-record updates and atomic metadata
 Cloud sync pages by ID, handles API row caps, and downloads card content once per sync. Failed page requests leave the prior offline collection intact. Browse displays batches of 100 matches. No Supabase migration is required for these changes. Browser storage remains subject to device capacity and browser eviction; export backups regularly.
 
 See [Amgi assessment](docs/amgi-assessment.md) for what can be reused conceptually and what would require a native app or separate backend.
+
+## Word and sentence practice
+
+The library has Words and Sentences tabs. All 1,980 bundled HSK word cards include a Chinese example and English translation, so the Sentences tab is available as soon as those words are loaded or synced. Pinyin is not displayed in either library tab or the web reviewer.
+
+Choosing **Review sentences** creates separate sentence cards for the examples once, with independent review progress. They sync to Anki as Basic-style notes in `::Sentences` subdecks. The companion marks them with `hanzi_flow_sentence` and a parent-reference tag, preserving their identity on the return sync. Update/restart the Anki companion before the first sentence-card sync. The **Add sentence** button supports personal Chinese/English cards. Pronunciation uses device Chinese text-to-speech for sentences.
+
+Browsing examples alone does not add review cards to the database; starting sentence practice does. Existing word schedules are preserved, and repeating the review action does not duplicate sentence cards. No database migration is required.

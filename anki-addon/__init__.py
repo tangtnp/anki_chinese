@@ -77,9 +77,17 @@ def snapshot(card):
     if card.queue==0: due=0
     elif card.queue in (1,4): due=card.due*1000
     else: due=int((time.time()+(card.due-mw.col.sched.today)*86400)*1000)
+    kind='sentence' if 'hanzi_flow_sentence' in note.tags else 'word'
+    prefix='hanzi_flow_sentence_for:'
+    sentence_for=next((tag[len(prefix):] for tag in note.tags if tag.startswith(prefix)),None)
+    related_word=''
+    if sentence_for:
+        parent_guid=sentence_for.rsplit(':',1)[0]
+        parent_fields=mw.col.db.scalar('select flds from notes where guid=?',parent_guid)
+        if parent_fields: related_word=plain(parent_fields.split('\x1f')[0])
     # Only built-in HSK audio paths are available on the website; other notes use TTS.
     audio=re.search(r'src="(hskstory-[^"/]+\.mp3)"',fields.get('Audio',''))
-    return {'id':note.guid+':'+str(card.ord),'guid':note.guid,'ordinal':card.ord,'deck':deck,'front':front,'back':back,'pinyin':plain(fields.get('TonePinyin',fields.get('Pinyin',''))),'example':plain(fields.get('ExampleHanzi','')),'translation':plain(fields.get('ExampleEnglish','')),'audio':'/media/'+audio[1] if audio else '', 'source':'anki','reps':card.reps,'interval':card.ivl,'due':due,'suspended':card.queue<0,'fingerprint':fingerprint(card),'reset_at':mw.col.get_config('hanzi_flow_reset_at',None)}
+    return {'id':note.guid+':'+str(card.ord),'kind':kind,'sentenceFor':sentence_for,'relatedWord':related_word,'guid':note.guid,'ordinal':card.ord,'deck':deck,'front':front,'back':back,'pinyin':plain(fields.get('TonePinyin',fields.get('Pinyin',''))),'example':plain(fields.get('ExampleHanzi','')),'translation':plain(fields.get('ExampleEnglish','')),'audio':'/media/'+audio[1] if audio else '', 'source':'anki','reps':card.reps,'interval':card.ivl,'due':due,'suspended':card.queue<0,'fingerprint':fingerprint(card),'reset_at':mw.col.get_config('hanzi_flow_reset_at',None)}
 
 def apply_and_snapshot(result):
     session,reviews,cloud_cards=result;col=mw.col;cfg=config();uid=session['user']['id']
@@ -105,7 +113,11 @@ def apply_and_snapshot(result):
         if model is None:
             model=col.models.new('Hanzi Flow');col.models.add_field(model,col.models.new_field('Front'));col.models.add_field(model,col.models.new_field('Back'));col.models.add_field(model,col.models.new_field('Pinyin'))
             template=col.models.new_template('Recognition');template['qfmt']='{{Front}}';template['afmt']='{{FrontSide}}<hr id="answer">{{Pinyin}}<br>{{Back}}';col.models.add_template(model,template);col.models.add(model)
-        note=col.new_note(model);note.guid=guid;note['Front']=data['front'];note['Back']=data['back'];note['Pinyin']=data.get('pinyin','');col.add_note(note,col.decks.id(data['deck']))
+        note=col.new_note(model);note.guid=guid;note['Front']=data['front'];note['Back']=data['back'];note['Pinyin']=data.get('pinyin','')
+        if data.get('kind')=='sentence':
+            note.tags.append('hanzi_flow_sentence')
+            if data.get('sentenceFor'): note.tags.append('hanzi_flow_sentence_for:'+data['sentenceFor'])
+        col.add_note(note,col.decks.id(data['deck']))
         for c in note.cards(): selected[note.guid+':'+str(c.ord)]=c.id
     acknowledgements=[]
     for event in reviews:
