@@ -79,7 +79,7 @@ def snapshot(card):
     else: due=int((time.time()+(card.due-mw.col.sched.today)*86400)*1000)
     # Only built-in HSK audio paths are available on the website; other notes use TTS.
     audio=re.search(r'src="(hskstory-[^"/]+\.mp3)"',fields.get('Audio',''))
-    return {'id':note.guid+':'+str(card.ord),'guid':note.guid,'ordinal':card.ord,'deck':deck,'front':front,'back':back,'pinyin':plain(fields.get('TonePinyin',fields.get('Pinyin',''))),'example':plain(fields.get('ExampleHanzi','')),'translation':plain(fields.get('ExampleEnglish','')),'audio':'/media/'+audio[1] if audio else '', 'source':'anki','reps':card.reps,'interval':card.ivl,'due':due,'suspended':card.queue<0,'fingerprint':fingerprint(card)}
+    return {'id':note.guid+':'+str(card.ord),'guid':note.guid,'ordinal':card.ord,'deck':deck,'front':front,'back':back,'pinyin':plain(fields.get('TonePinyin',fields.get('Pinyin',''))),'example':plain(fields.get('ExampleHanzi','')),'translation':plain(fields.get('ExampleEnglish','')),'audio':'/media/'+audio[1] if audio else '', 'source':'anki','reps':card.reps,'interval':card.ivl,'due':due,'suspended':card.queue<0,'fingerprint':fingerprint(card),'reset_at':mw.col.get_config('hanzi_flow_reset_at',None)}
 
 def apply_and_snapshot(result):
     session,reviews,cloud_cards=result;col=mw.col;cfg=config();uid=session['user']['id']
@@ -110,6 +110,9 @@ def apply_and_snapshot(result):
     acknowledgements=[]
     for event in reviews:
         eid=event['id'];record=ledger.get(eid)
+        cutoff=col.get_config('hanzi_flow_reset_at',None)
+        if cutoff and event.get('reviewed_at','')<=cutoff:
+            acknowledgements.append({'id':eid,'status':'conflict','message':'This review predates your progress reset and was not replayed.'});continue
         if record and record['status'] in ('applied','conflict'):
             acknowledgements.append({'id':eid,**record});continue
         cid=selected.get(event['card_id'])

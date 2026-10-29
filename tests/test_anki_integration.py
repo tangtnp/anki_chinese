@@ -36,6 +36,11 @@ class RealAnki(unittest.TestCase):
   event2={**event,'id':'event-2','expected_reps':1,'expected_fingerprint':None,'rating':4}
   self.assertEqual(self.apply([event2])[1][0]['status'],'applied');self.assertEqual(self.col.get_card(card.id).reps,2)
   self.assertEqual(self.apply([{**event,'id':'conflict'}])[1][0]['status'],'conflict');self.assertEqual(self.col.get_card(card.id).reps,2)
+ def test_pre_reset_review_is_not_replayed(self):
+  card=self.note();self.col.set_config('hanzi_flow_reset_at','2026-10-29T10:00:00.000Z')
+  event={'id':'old-event','card_id':'test-note:0','expected_reps':0,'rating':3,'reviewed_at':'2026-10-29T09:00:00.000Z'}
+  result=self.apply([event]);self.assertEqual(result[1][0]['status'],'conflict');self.assertEqual(self.col.get_card(card.id).reps,0)
+  self.assertEqual(result[2][0]['reset_at'],'2026-10-29T10:00:00.000Z')
  def test_web_note_import_is_idempotent(self):
   data={'id':'web-note:0','front':'谢谢','back':'thank you','deck':'My Chinese','pinyin':'xiè xie','source':'web'}
   rows=[{'id':data['id'],'data':data}]
