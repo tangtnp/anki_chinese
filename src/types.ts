@@ -1,0 +1,3 @@
+export type Card = { id:string; guid?:string; ordinal?:number; deck:string; front:string; back:string; pinyin?:string; example?:string; translation?:string; audio?:string; reps:number; due:number; interval:number; source:'library'|'anki'|'web'; suspended?:boolean; fingerprint?:string };
+export type Review = {id:string; card_id:string; rating:number; expected_reps:number; expected_fingerprint?:string; reviewed_at:string; status:'pending'|'applied'|'conflict'; message?:string; elapsed_ms:number};
+export type Store = {cards:Card[]; reviews:Review[]; lastSync?:string; history:Record<string,number>};

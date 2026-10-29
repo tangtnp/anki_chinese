@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env*
+.vercel/
+__pycache__/
+.DS_Store
+*.apkg
+!public/hanzi-flow.ankiaddon
