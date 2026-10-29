@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "python3 -m unittest discover -s tests -v"
+    "test": "python3 -m unittest discover -s tests -v && node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",
@@ -17,6 +17,7 @@
     "react-dom": "latest"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.13",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "typescript": "latest",

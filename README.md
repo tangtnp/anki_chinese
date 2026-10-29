@@ -47,3 +47,11 @@ npm run build
 ## Validation
 
 Production TypeScript/build and isolated Python concurrency tests are automated. Live phone → Supabase → Mac verification requires a configured Supabase project and a signed-in Anki companion. Do not consider the sync connection verified until the same test card and its review appear on both devices.
+
+## Automatic review cleanup
+
+Run `supabase/migrations/20261029_review_cleanup.sql` once in the existing project's SQL Editor (or download `/review-cleanup.sql` from the updated site). New projects get the same migration in `supabase/setup.sql`.
+
+Each signed-in web sync removes up to 5,000 applied review records whose **Mac acknowledgement is older than 90 days**. The database records acknowledgement times itself. Existing applied reviews receive a new 90-day grace period when the migration is installed. Pending reviews, conflicts, cards, schedules, and Anki's own review history are preserved. Local review lists reflect cleanup after the next successful sync; daily practice totals stay in the browser's separate history.
+
+Cleanup runs when the website syncs, not while it is closed. Older databases without the migration continue syncing without cleanup. The Mac retry ledger is retained so an old offline device cannot replay a previously applied review after its cloud row expires. Storage usage can still grow with cards and unresolved reviews; cleanup does not guarantee a fixed database size. Postgres may reuse deleted-row space rather than immediately reducing the displayed disk size.
