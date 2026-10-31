@@ -46,6 +46,7 @@ class RealAnki(unittest.TestCase):
   rows=[{'id':data['id'],'data':data}];result=self.apply(cards=rows)
   sentence=next(c for c in result[2] if c['id']==data['id'])
   self.assertEqual(sentence['kind'],'sentence');self.assertEqual(sentence['sentenceFor'],'test-note:0');self.assertEqual(sentence['relatedWord'],'你好')
+  self.assertEqual(sentence['deck'],'HSK 1');self.assertIsNone(self.col.decks.by_name('HSK 1::Sentences'))
   event={'id':'sentence-review','card_id':data['id'],'expected_reps':0,'rating':3,'elapsed_ms':1000}
   result=self.apply([event],rows);self.assertEqual(result[1][0]['status'],'applied');self.assertEqual(self.col.get_card(parent.id).reps,0)
  def test_web_note_import_is_idempotent(self):

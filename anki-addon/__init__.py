@@ -117,7 +117,11 @@ def apply_and_snapshot(result):
         if data.get('kind')=='sentence':
             note.tags.append('hanzi_flow_sentence')
             if data.get('sentenceFor'): note.tags.append('hanzi_flow_sentence_for:'+data['sentenceFor'])
-        col.add_note(note,col.decks.id(data['deck']))
+        # Older offline clients may still submit a generated sentence subdeck.
+        target_deck=data['deck']
+        if data.get('kind')=='sentence' and target_deck.endswith('::Sentences'):
+            target_deck=target_deck.rsplit('::',1)[0]
+        col.add_note(note,col.decks.id(target_deck))
         for c in note.cards(): selected[note.guid+':'+str(c.ord)]=c.id
     acknowledgements=[]
     for event in reviews:
