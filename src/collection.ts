@@ -1,11 +1,15 @@
 import type {Card,Review,Store} from './types';
 
+// Older sentence cards may still live in a generated subdeck. Group them with their lesson.
+export function lessonDeck(card:Pick<Card,'kind'|'deck'>){return card.kind==='sentence'?card.deck.replace(/::Sentences$/,''):card.deck}
+
 // Linear-time indexing avoids scanning every review for every card on large decks.
 export function indexCollection(cards:Card[],now=Date.now()){
  const decks=new Map<string,{cards:Card[];ready:number;learned:number}>();
  let dueCount=0;
  for(const card of cards){
-  let deck=decks.get(card.deck);if(!deck){deck={cards:[],ready:0,learned:0};decks.set(card.deck,deck)}
+  const name=lessonDeck(card);
+  let deck=decks.get(name);if(!deck){deck={cards:[],ready:0,learned:0};decks.set(name,deck)}
   deck.cards.push(card);if(card.reps>0)deck.learned++;
   if(!card.suspended&&card.due<=now){deck.ready++;dueCount++}
  }
